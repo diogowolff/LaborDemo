@@ -23,3 +23,9 @@ index_timeseries = array2table([(2005:2019)', yearly_index], ...
     'VariableNames',{'YEAR','INDEX'});
 
 dataset = outerjoin(dataset, index_timeseries);
+% dataset(:,INCWAGE) = dataset(:,INCWAGE)./dataset(:,INDEX);   % Wages in
+% real terms
+
+%% DANGER ZONE!! Removing some data points that don't have data
+
+dataset = dataset(dataset.INCWAGE ~= 999999, :);
