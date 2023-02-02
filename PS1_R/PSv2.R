@@ -93,9 +93,9 @@ for(x in grid) {
   print(x)
 }
 
-df <- data.frame("AGE" = values, "axis" = grid)
+df <- data.frame("coef" = values, "AGE" = grid)
 
-ggplot(df, aes(x = axis, y = AGE)) +
+ggplot(df, aes(x = AGE, y = coef)) +
   geom_line() +
   ggtitle("Effect of AGE on P as a function of AGE", subtitle = "with NCHILD = 1 and EDUCD = 65 fixed")
 
@@ -115,9 +115,9 @@ for(x in grid) {
 
 
 educ <-  values*grid
-df <- data.frame("EDUCD" = educ, "axis" = grid)
+df <- data.frame("coef" = educ, "EDUCD" = grid)
 
-ggplot(df, aes(x = axis, y = EDUCD)) +
+ggplot(df, aes(x = EDUCD, y = coef)) +
   geom_line() +
   ggtitle("Effect of EDUCD on P as a function of EDUCD", subtitle = "with AGE = 45 and NCHILD = 1 fixed")
 
