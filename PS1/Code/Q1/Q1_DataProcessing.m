@@ -1,10 +1,10 @@
 clear
 
-addpath('../Data');
+addpath('../../Data');
 
 %% Loading datasets required
 
-dataset = readtable('usa_00002.csv');
+dataset = readtable('small_dataset.csv');
 
 % median CPI deseasonalized
 price_index = table2timetable(readtable('MEDCPIM094SFRBCLE.csv'));
@@ -28,4 +28,5 @@ dataset = outerjoin(dataset, index_timeseries);
 
 %% DANGER ZONE!! Removing some data points that don't have data
 
-dataset = dataset(dataset.INCWAGE ~= 999999, :);
+dataset = dataset(dataset.INCWAGE ~= 999999 & dataset.INCWAGE > 0 & ...
+    dataset.HHINCOME > 0, :);
