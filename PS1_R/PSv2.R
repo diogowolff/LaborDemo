@@ -71,12 +71,35 @@ multiEpan <- function(x) {
 betaLL <- function(point, bws) {
   Zx <- sweep(Z, 2, c(0, point)) # bws
   Kx <- apply(Zx[,-1], 1, \(x) dmvnorm(x/bws))
-  solve(t(Zx)%*%(Kx*Zx))%*%t(Zx)%*%(Kx*y)
+  # solve(t(Zx)%*%(Kx*Zx))%*%t(Zx)%*%(Kx*y)
+  solve(t(Zx)%*%(Kx*Zx), t(Zx)%*%(Kx*y))
 }
 
 
 
-## PLOTTING
+
+#############################
+###  GRID OF KERNEL VALS  ###
+#############################
+
+gridAGE <- seq(min(dataClean$AGE), max(dataClean$AGE), by = 2)
+gridAGE <- gridAGE[-c(1:5, (length(gridAGE)-5):length(gridAGE))]
+
+gridEDUCD <- seq(min(dataClean$EDUCD), max(dataClean$EDUCD), by = 2)
+gridEDUCD <- gridEDUCD[-c(1:8, (length(gridEDUCD)-8):length(gridEDUCD))]
+
+gridNCHILD <- seq(min(dataClean$NCHILD), max(dataClean$NCHILD))
+gridNCHILD <- gridNCHILD[-c((length(gridNCHILD)-3):length(gridNCHILD))]
+
+
+
+kernVals <- array(NA, dim = c(length(gridAGE), length(gridEDUCD), length(gridNCHILD)),
+                  dimnames = list(gridAGE, gridEDUCD, gridNCHILD))
+
+
+
+
+## PARTIAL PLOTS
 
 default <- c(45, 1, 65)
 
@@ -120,14 +143,6 @@ df <- data.frame("coef" = educ, "EDUCD" = grid)
 ggplot(df, aes(x = EDUCD, y = coef)) +
   geom_line() +
   ggtitle("Effect of EDUCD on P as a function of EDUCD", subtitle = "with AGE = 45 and NCHILD = 1 fixed")
-
-
-
-
-
-
-
-
 
 
 
