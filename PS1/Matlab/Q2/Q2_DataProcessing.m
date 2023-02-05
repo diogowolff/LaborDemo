@@ -1,18 +1,16 @@
 clear
 
-addpath('../../Data');
+addpath('../../Extracts');
 
 %% Loading datasets required
 
-dataset = readtable('small_dataset.csv');
+dataset = readtable('data_woman_age_subsample.csv');
 
 % median CPI deseasonalized
 price_index = table2timetable(readtable('MEDCPIM094SFRBCLE.csv'));
 
 
 %% Data wrangling
-
-sample = dataset(1:10000, :);
 
 timeframe = timerange('2005-01-01', '2020-01-01');
 index_2005 = price_index(timeframe, :);

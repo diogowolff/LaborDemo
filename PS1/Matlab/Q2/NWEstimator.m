@@ -1,4 +1,4 @@
-function [m] = LCEstimator(y, x, x0, h_vec)
+function [m] = NWEstimator(y, x, x0, h_vec)
     scaled_vector = (x - x0)./h_vec;
     
     kernel_values = Kernel(vecnorm(scaled_vector, 2, 2));
