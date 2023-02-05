@@ -1,16 +1,14 @@
-function [m] = NWEstimator(y, x, x0, h_vec)
-    scaled_vector = (x - x0)./h_vec;
+function [m] = NWEstimator(y, x, x0, h)
+    scaled_vector = (x - x0)./h;
     
-    kernel_values = Kernel(vecnorm(scaled_vector, 2, 2));
+    kernel_values = Kernel(scaled_vector);
     
-    
-    treatment_indicator = y == 1;
-    
-    numerator = sum(kernel_values .* treatment_indicator);
+    numerator = sum(kernel_values .* y);
     
     if isnan(numerator / sum(kernel_values))
         m = 0;
     else 
         m = numerator / sum(kernel_values);
+    end
 end
 

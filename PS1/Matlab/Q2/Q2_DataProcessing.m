@@ -26,8 +26,8 @@ dataset = outerjoin(dataset, index_timeseries);
 
 %% DANGER ZONE!! Removing some data points that don't have data
 
-dataset = dataset(dataset.INCWAGE ~= 999999 & dataset.INCWAGE > 0 & ...
-    dataset.HHINCOME > 0, :);
+dataset = dataset(dataset.INCWAGE ~= 999999 & dataset.INCWAGE >= 0 & ...
+    dataset.HHINCOME >= 0, :);
 
 
 
