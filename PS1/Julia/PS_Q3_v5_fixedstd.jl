@@ -49,33 +49,29 @@ function loglike(pars) # ::Vector{BigFloat}
     alpa, beta, gamma = pars[1:3], pars[4], pars[5:6]
     std_eps, std_ksi, rho = pars[7:9]
 
-    std_eps = std_eps^2 # force std_eps to be positive
-    std_ksi = std_ksi^2 # force std_ksi to be positive
-    rho = recover_rho(rho) # force rho to be between -1 and 1
+    # std_eps = std_eps^2 # force std_eps to be positive
+    # std_ksi = std_ksi^2 # force std_ksi to be positive
+    # rho = recover_rho(rho) # force rho to be between -1 and 1
 
     var_eta = std_eps^2 + std_ksi^2 - 2*rho*std_eps*std_ksi
 
     std_eta = sqrt(var_eta)
     
-    probabilities = smoother.(prob.(P, w, nly, eachrow(Z), eachrow(X)))
+    probabilities = prob.(P, w, nly, eachrow(Z), eachrow(X))
 
     return - sum(log.(probabilities))
 end
 
 initPars = [-2.0, 2.0, -2.0, -2.0, 2.0, 2.0, 5, 5, 0.1]
-
+initPars = [0.368133, -4.75198, -2.71201, -0.0188729, 0.0977555, 0.0280349, 0.846266^2, 1.0285^2, recover_rho(-2.91285)] ## bboptimize result
 initPars = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 5, 0.0]
 
-MLest = optimize(loglike, initPars, LBFGS(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
+MLest = optimize(loglike, initPars, LBFGS(), Optim.Options(show_trace = false, iterations = 10000)) |> Optim.minimizer
 
-function g!(storage, x)
-    storage = ForwardDiff.gradient(loglike, x)
-end
+res = bboptimize(loglike; SearchRange = (-5.0, 5.0), NumDimensions = 9)
 
-od = OnceDifferentiable(loglike, initPars; autodiff = :forward)
 
-MLest2 = optimize(loglike, g!, initPars, LBFGS(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
-
+# od = OnceDifferentiable(loglike, initPars; autodiff = :forward)
 
 params = DataFrame(names = ["alpa_const", "alpa_age", "alpa_nchild", "beta_NLinc", "gamma_educd", "gamma_age", "std_eps", "std_ksi", "rho"], params = [MLest[1:6]..., MLest[7]^2, MLest[8]^2, recover_rho(MLest[9])])
 
