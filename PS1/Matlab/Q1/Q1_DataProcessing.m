@@ -4,8 +4,10 @@ addpath('../../Data');
 
 %% Loading datasets required
 
-dataset = readtable('small_dataset.csv');
-
+%opts = detectImportOptions('usa_00002.csv');
+%opts.DataLines = [2, Inf];
+dataset = readtable('20pct_dataset.csv');
+dataset = dataset(dataset.YEAR == 2005, :);
 
 %% DANGER ZONE!! Cleaning some weird things
 
