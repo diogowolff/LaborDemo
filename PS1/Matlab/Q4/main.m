@@ -7,7 +7,13 @@ dataset_4.WorkTot = (dataset_4.UHRSWORK .* dataset_4.WKSWORK2);
 
 dataset_4 = dataset_4(:, {'EDUC', 'Wage', 'NLINC', 'WorkTot', 'INCTOT'});
 
-options = optimoptions(@fminunc,'Display','iter','Algorithm','quasi-newton');
+options = optimoptions(@fmincon,'Display','iter');
 
-GMM([0, 0, -3000], dataset_4)
-test = fminunc(@(x) GMM(x, dataset_4), [0, 0, -3000], options);
+gs = GlobalSearch;
+
+problem = createOptimProblem('fmincon', 'x0', [100, 0, -3000], 'objective',...
+    @(x) GMM(x, dataset_4), 'lb', [-100,-100, 0], 'ub', [1000, 2000, 20000], ...
+    'options',options);
+
+x = run(gs, problem);
+
