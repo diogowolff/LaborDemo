@@ -14,12 +14,25 @@ using BlackBoxOptim
 
 
 # copying main dataframe
-df3 = copy(df)
+df3 = df[!, [:AGE, :EDUCD, :NCHILD, :EMPSTAT, :INCWAGE, :HHINCOME, :UHRSWORK, :WKSWORK2]]
+
+
+nominalValues = [:HHINCOME, :INCTOT, :INCWAGE, :INCWELFR, :INCSS];
+
+df = df[(df3.EDUCD .!= 001) .&
+        (df3.EDUCD .!= 999) .&
+        (df3.INCWAGE .!= 999998) .&
+        (df3.HHINCOME .>= 0) .&
+        (df3.EMPSTAT .!= 0) .& (df3.WKSWORK2 .!= 0) .&
+        (df3.EMPSTATD .!= 00) .& (df3.UHRSWORK .!= 00) .&
+        (sum(eachcol(df[!, nominalValues] .== 9999999)) .== 0)
+        , :]
+df3[!, nominalValues] = df3[!, nominalValues]./df3.INDEX;
 
 # DATA WOMAN CLEAN
 
 df3 = df3[df3.INCWAGE > 0, :]
-df3 = df3[shuffle(1:nrow(df3))[1:100000], :];
+# df3 = df3[shuffle(1:nrow(df3))[1:100000], :];
 
 # Setting up variables
 X = Matrix([ones(nrow(df3)) df3.AGE df3.NCHILD]);
