@@ -1,6 +1,7 @@
 %% Data processing as done in Mincer (1962)
 
-dataset_1b = dataset(dataset.RACE == 1 & dataset.EMPSTAT ~= 3 & dataset.RELATE == 1, :);
+dataset_1b = readtable('20pct_dataset.csv');
+dataset_1b = dataset_1b(dataset_1b.RACE == 1 & dataset_1b.EMPSTAT ~= 3 & dataset_1b.RELATE == 1, :);
 
 
 % heads_working_index = dataset(dataset.RELATE == 1 & CLASSWKR == 2, 'CBSERIAL');

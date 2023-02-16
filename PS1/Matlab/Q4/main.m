@@ -11,7 +11,7 @@ dataset_4 = dataset4(dataset4.SEX == 1 & dataset4.MARST < 3 & dataset4.AGE >= 25
     dataset4.AGE <= 55 & dataset4.YEAR == 2015 & dataset4.EMPSTAT == 1, :);
 
 dataset_4.NLINC = dataset_4.HHINCOME - dataset_4.INCWAGE;
-dataset_4.Wage = dataset_4.INCWAGE ./ (dataset_4.UHRSWORK .* dataset_4.WKSWORK2);
+dataset_4.Wage = dataset_4.INCWAGE ./ (dataset_4.UHRSWORK .* dataset_4.WKSWORK2 );
 dataset_4.WorkTot = (dataset_4.UHRSWORK .* dataset_4.WKSWORK2);
 
 dataset_4 = dataset_4(:, {'EDUC', 'Wage', 'NLINC', 'WorkTot', 'INCTOT'});
