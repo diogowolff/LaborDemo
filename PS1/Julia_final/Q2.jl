@@ -7,15 +7,12 @@ using Distributions
 using Random
 using Plots; pyplot()
 using Optim
-# using StatsPlots
-# using FileIO
+using StatsPlots
 using JLD2
 using BlackBoxOptim
 
 # copying main dataframe
-# df = CSV.read("clean_data.csv", DataFrame)
-
-df2 = df[(25 .<= df2.AGE .<= 55) .& (df2.SEX .== 2) .& .!((df2.EMPSTAT .== 3) .& (df2.INCWAGE .> 0)), :]
+# df = CSV.read("data_Q2_Q3.csv", DataFrame)
 
 ###########
 ##  (a)  ##
@@ -119,9 +116,13 @@ res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4, MaxTime = 270
 
 # Best candidate: [82.924, 6.61095, -5.62199, -0.0881276]
 
+D = Matrix([df2[!, [:AGE, :EDUCD, :NCHILD]] df2[!,:HHINCOME] .- df2[!,:INCWAGE]]);
 
 
-
+gridAGE = range(minimum(D[:,1]), maximum(D[:,1]), length = 100)
+gridEDUCD = range(minimum(D[:,2]), maximum(D[:,2]));
+gridNCHILD = range(minimum(D[:,3]), maximum(D[:,3]));
+gridNLINC = range(minimum(D[:,4]), maximum(D[:,4]), length = 100);
 
 
 
