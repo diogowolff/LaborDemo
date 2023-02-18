@@ -9,7 +9,7 @@ using Random
 using Plots; pyplot()
 using Optim
 using StatsPlots
-using ForwardDiff
+# using ForwardDiff
 using BlackBoxOptim
 using JLD2
 
@@ -29,7 +29,7 @@ Npdf(x) = pdf(Normal(), x);
 
 smoother(x) = 1/(1 + exp(5*(1/2 - x))) # probability smoother
 
-recover_rho(x) = 2/(1 + exp(-x))-1 # function to force rho to be between -1 and 1
+# recover_rho(x) = 2/(1 + exp(-x))-1 # function to force rho to be between -1 and 1
 
 function loglike(pars)
     alpa, beta, gamma = pars[1:3], pars[4], pars[5:6]
@@ -48,14 +48,16 @@ function loglike(pars)
     return - sum(log.(smoother.(probabilities)))
 end
 
-ranges = [(-200, 200), (-200, 200), (-200, 200), (-1000, 1000), (-200, 200), (-200, 200), (0, 200), (0, 200), (-1, 1)];
+# Ranges in which to search. Determined through previous tests with wider ranges
+ranges = [(-500, 500), (-500, 500), (-500, 500), (-1000, 1000), (-200, 200), (-200, 200), (0, 200), (0, 200), (-1, 1)];
+
 res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 9)
 a = best_candidate(res)
 
 save_object("res")
 
 
-
+# Verifying that the point is indeed a global minimum with LBFGS and Nelder Mead
 b = optimize(loglike, a, LBFGS(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
 
 c = optimize(loglike, a, NelderMead(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
