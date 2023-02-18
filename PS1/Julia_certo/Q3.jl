@@ -50,24 +50,32 @@ function loglike(pars)
 end
 
 # Ranges in which to search. Determined through previous tests with wider ranges
-ranges = [(-250, 250), (-250, 250), (-250, 250), (-250, 250), (-250, 250), (-250, 250), (0, 100), (0, 100), (-1, 1)];
+ranges = [(-500, 500), (-500, 500), (-500, 500), (-500, 500), (-500, 500), (-500, 500), (0, 200), (0, 200), (-1, 1)];
 
-res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 9, MaxTime = 20*60)
+res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 9)
 a = best_candidate(res)
+
+save_object("Q3.jld2", res)
 
 b = optimize(loglike, a, LBFGS(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
 
 c = optimize(loglike, initPars, NelderMead(), Optim.Options(show_trace = true, iterations = 10000)) |> Optim.minimizer
 
-initPars = [155.63353029473535, 81.57539655029177, -9.099055156112172, 96.4011978647705, 0.4225382140427, 0.95332711438886, 81.05006695914284, 47.426926385851196, 0.28499418799781706]
+initPars = [155.63353029473535, 81.57539655029177, -9.099055156112172, 96.4011978647705, -91.4225382140427, -185.95332711438886, 81.05006695914284, 47.426926385851196, 0.28499418799781706]
 
 
 
+function plotutil(x, i)
+    vars = [155.63353029473535, 81.57539655029177, -9.099055156112172, 96.4011978647705, -91.4225382140427, -185.95332711438886, 81.05006695914284, 47.426926385851196, 0.28499418799781706]
+    vars[i] = x - vars[i]
+    return loglike(vars)
+end
 
+for var in 1:length(initPars)
+    plot(x -> plotutil(x, var))
+end
 
-
-
-
+plot(x -> plotutil(x, 3))
 
 
 
