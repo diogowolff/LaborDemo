@@ -1,22 +1,21 @@
-using Queryverse
+# using Queryverse
 using DataFrames
 using Dates
 using Statistics
 using StatsPlots
 using CSV
-using FileIO
-
+# using FileIO
 
 ### Loading data for machines that can't run Queryverse
-# cd("D:\\Users\\b44821\\Documents")
-# df = CSV.read("full_data.csv", DataFrame)
+cd("D:\\Users\\b44821\\OneDrive - Fundacao Getulio Vargas - FGV\\Documentos")
+df = CSV.read("full_data.csv", DataFrame)
 
 ### Loading data for machines that can't run CSV
-df = load("data_woman_age.csv", delim = ',') |> DataFrame
+# df = load("data_woman_age.csv", delim = ',') |> DataFrame
 
 select!(df, :YEAR, :SEX, :AGE, :EDUCD, :NCHILD, :EMPSTAT, :EMPSTATD, :INCWAGE, :HHINCOME, :UHRSWORK, :WKSWORK2)
 
-# df = df[(25 .<= df.AGE .<= 55) .& (df.SEX .== 2), :];
+df = df[(25 .<= df.AGE .<= 55) .& (df.SEX .== 2), :];
 
 df = df[(df.EDUCD .!= 001) .&
         (df.EDUCD .!= 999) .&
@@ -25,8 +24,8 @@ df = df[(df.EDUCD .!= 001) .&
         (df.EMPSTAT .!= 0) .&
         (df.EMPSTATD .!= 00) .&
         (df.INCWAGE .!= 9999999) .& (df.HHINCOME .!= 9999999) .&
-        .!((df.EMPSTAT .== 3) .& (df.INCWAGE .> 0)) .&
-        (df.HHINCOME .- df.INCWAGE .>= 0), :]
+        .!((df.EMPSTAT .!= 1) .& (df.INCWAGE .> 0)) .&
+        (df.HHINCOME .- df.INCWAGE .> 0), :]
 
 df.WKSWORK2 = [0, 7, 20, 33, 43.5, 48.5, 51][df.WKSWORK2 .+ 1];
 
@@ -45,5 +44,5 @@ transform!(priceInd, :INDEX => (x -> x/priceInd[1, :INDEX]) => :INDEX);
 leftjoin!(df, priceInd, on = :YEAR);
 df[!, [:INCWAGE, :HHINCOME]] = df[!, [:INCWAGE, :HHINCOME]]./df.INDEX;
 
-save("data_Q2_Q3.csv", df)
-# CSV.write("data_Q2_Q3.csv", df)
+# save("data_Q2_Q3.csv", df)
+CSV.write("data_Q2_Q3.csv", df) # Final dims should be 7884758×12
