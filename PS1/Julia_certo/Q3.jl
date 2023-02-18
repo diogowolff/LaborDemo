@@ -50,12 +50,9 @@ end
 
 ranges = [(-200, 200), (-200, 200), (-200, 200), (-1000, 1000), (-200, 200), (-200, 200), (0, 200), (0, 200), (-1, 1)];
 res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 9)
-# a = best_candidate(res)
+a = best_candidate(res)
 
 save_object("res")
-
-
-
 
 
 
