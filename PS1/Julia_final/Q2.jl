@@ -8,15 +8,22 @@ using Random
 using Plots; pyplot()
 using Optim
 using StatsPlots
+<<<<<<< HEAD
+=======
 # using FileIO
+>>>>>>> 4a811045dfc042bf4c33270459714126182dddd3
 using JLD2
 using BlackBoxOptim
 
 # copying main dataframe
+<<<<<<< HEAD
+# df = CSV.read("data_Q2_Q3.csv", DataFrame)
+=======
 df = load("data_Q2_Q3.csv") |> DataFrame;
 
 df = df[shuffle(1:nrow(df))[1:10000], :]
 
+>>>>>>> 4a811045dfc042bf4c33270459714126182dddd3
 
 ###########
 ##  (a)  ##
@@ -122,9 +129,13 @@ res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4, MaxTime = 270
 
 # Best candidate: [82.924, 6.61095, -5.62199, -0.0881276]
 
+D = Matrix([df2[!, [:AGE, :EDUCD, :NCHILD]] df2[!,:HHINCOME] .- df2[!,:INCWAGE]]);
 
 
-
+gridAGE = range(minimum(D[:,1]), maximum(D[:,1]), length = 100)
+gridEDUCD = range(minimum(D[:,2]), maximum(D[:,2]));
+gridNCHILD = range(minimum(D[:,3]), maximum(D[:,3]));
+gridNLINC = range(minimum(D[:,4]), maximum(D[:,4]), length = 100);
 
 ################
 ## EXTRA CODE ##
