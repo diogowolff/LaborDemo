@@ -17,7 +17,6 @@ df = load("data_Q2_Q3.csv") |> DataFrame;
 
 df = df[shuffle(1:nrow(df))[1:10000], :]
 
-
 ###########
 ##  (a)  ##
 ###########
@@ -25,7 +24,6 @@ df = df[shuffle(1:nrow(df))[1:10000], :]
 # Definitions for Kernel regression
 D = Matrix([df[!, [:AGE, :EDUCD, :NCHILD]] df[!,:HHINCOME] .- df[!,:INCWAGE]]);
 y = df.EMPSTAT .!= 3;
-w = df.INCWAGE ./ (df.UHRSWORK .* df.WKSWORK2);
 
 # Kernel
 function kernel(point, X, Y)
@@ -58,13 +56,15 @@ probs = map(x -> kernel(x, D, y), eachrow(D))
 ##  (b)  ##
 ###########
 
-# Removing people NILF
-Dy, wy, probsy = D[y,:], w[y], probs[y]
+# Removing people NILF and computing wages
+Dy, w, probsy = D[y,:], probs[y]
+w = df.INCWAGE ./ (df.UHRSWORK .* df.WKSWORK2);
+w = w[y]
 
-gw = Vector{Float64}(undef, nrow(df))
-gx = Matrix{Float64}(undef, nrow(df), 2)
+gw = Vector{Float64}(undef, size(Dy, 1))
+gx = Matrix{Float64}(undef, size(Dy, 1), 2)
 
-@threads for k in 1:nrow(df)
+for k in 1:size(Dy, 1) # @threads
     gw[k] = kernel(probsy[k], probsy, wy)
     gx[k,:] = kernel(probsy[k], probsy, Dy[:, 1:2])
 end
@@ -86,7 +86,7 @@ gamma = inv(ex'*ex)*(ex'*ew)
 ###########
 
 X = Matrix([ones(nrow(df)) df.AGE df.NCHILD]);
-Z = Matrix([df.EDUCD df.AGE]);
+Z = Matrix([df.AGE df.EDUCD]);
 nly = df.HHINCOME .- df.INCWAGE;
 
 sm(x) = 1/(1 + exp(10*(1/2 - x))) # probability smoother
@@ -97,7 +97,7 @@ function loglike(pars)
     D = Z*gamma - X*alpha - nly*beta # troquei sinal
     
     probs = Vector{Float64}(undef, size(D, 1));
-    @threads for k in 1:size(D, 1)
+    for k in 1:size(D, 1) # @threads
         probs[k] = kernel(D[k], D, y)
     end
 
@@ -147,16 +147,24 @@ end
 
 # Setting up grids
 gridEDUCD = range(quantile(D[:,2], 0.1), quantile(D[:,2], 0.9));
-gridNLINC = range(quantile(D[:,4], 0.1), quantile(D[:,4], 0.9), length = 100);
+gridNLINC = range(0, quantile(D[:,4], 0.9), length = 100);
 indexes = [(educd, nlinc) for educd in 1:length(gridEDUCD), nlinc in 1:length(gridNLINC)];
 values = Array{Float64}(undef, size(indexes));
 
 ## Computing Kernel for AGE = 35, NCHILD = 1
 for (educd, nlinc) in indexes
-    values[educd, nlinc] = kernel([35, gridEDUCD[educd], 1, gridNLINC[nlinc]], D, y)
+    values[educd, nlinc] = kernel([35, gridEDUCD[educd], 0, gridNLINC[nlinc]], D, y)
 end
-
 
 plotProb(values, gridEDUCD, gridNLINC)
 plot!(size=(600,400))
-savefig("prob_35_1.pdf")
+savefig("prob_35_0.pdf")
+
+## Computing Kernel for AGE = 45, NCHILD = 3
+for (educd, nlinc) in indexes
+    values[educd, nlinc] = kernel([50, gridEDUCD[educd], 3, gridNLINC[nlinc]], D, y)
+end
+
+plotProb(values, gridEDUCD, gridNLINC)
+plot!(size=(600,400))
+savefig("prob_50_3.pdf")
