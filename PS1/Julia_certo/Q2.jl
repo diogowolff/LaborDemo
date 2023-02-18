@@ -123,14 +123,20 @@ function loglike(pars)
 end
 
 ### Global Optimization
-ranges = [(-250, 250), (-250, 250), (-250, 250), (-250, 250)]
-res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4, MaxTime = 10*60)
+ranges = [(-500, 500), (-500, 500), (-500, 500), (-500, 500)]
+res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4)
+
+save_object("res.jld2", res)
+
+# FINAL BEST: [126.892, -35.7332, 247.032, -0.551443]
+####################################
+
 
 
 # best candidate:
 initPars = [-42.1493, 0.341409, 3.57672, 1.48707e-5] # global
 initPars = [-93.5793, -34.3943, -36.5009, 1.17747] # global
-
+initPars = [126.892, -35.7332, 247.032, -0.551443]
 
 ### Local optimization
 a = optimize(loglike, initPars, Optim.Options(show_trace = true))
