@@ -22,7 +22,7 @@ df = CSV.read("data_Q2_Q3.csv", DataFrame)
 
 # We subset the data to 50 thousand observations for a faster runtime.
 Random.seed!(1234)
-df = df[shuffle(1:nrow(df))[1:50000], :]
+df = df[shuffle(1:nrow(df))[1:10000], :]
 
 ###########
 ##  (a)  ##
@@ -31,7 +31,6 @@ df = df[shuffle(1:nrow(df))[1:50000], :]
 # Definitions for Kernel regression
 D = Matrix([df[!, [:AGE, :EDUCD, :NCHILD]] df[!,:HHINCOME] .- df[!,:INCWAGE]]);
 y = df.EMPSTAT .!= 3;
-
 
 # Kernel
 function kernel(point, X, Y)
@@ -56,12 +55,11 @@ end
 
 probs = Vector{Float64}(undef, size(D, 1));
 
-@time begin
+
 @threads for k in 1:size(D, 1)
     probs[k] = kernel(D[k,:], D, y)
 end
-end
-# with 10k and 7-threads, it takes XXX seconds
+
 
 ###########
 ##  (b)  ##
@@ -86,6 +84,9 @@ ex = Dy[:,1:2] .- gx;
 
 gamma = inv(ex'*ex)*(ex'*ew)
 
+# gamma = [0.19917626128433602, 0.3032122356651159]
+# Obtained gamma_1 = 0.19917626128433602; gamma_2 = 0.3032122356651159
+
 ### PLotting M
 # M = gw .- gx*gamma
 # DD = [probs M]
@@ -103,13 +104,14 @@ nly = df.HHINCOME .- df.INCWAGE;
 
 sm(x) = 1/(1 + exp(10*(1/2 - x))) # probability smoother
 
+
 function loglike(pars)
     alpha = pars[1:3]
     beta = pars[4]
     D = Z*gamma - X*alpha - nly*beta # troquei sinal
     
     probs = Vector{Float64}(undef, size(D, 1));
-    for k in 1:size(D, 1) # @threads
+    @threads for k in 1:size(D, 1)
         probs[k] = kernel(D[k], D, y)
     end
 
@@ -117,19 +119,35 @@ function loglike(pars)
     probs[probs .> 1] .= 1
     probs = sm.(probs)
 
-    # if sum(1 .- (0 .< probs .< 1)) != 0 return Inf end
-
     return - sum(y.*log.(probs) .+ (1 .- y).*(log.(1 .- probs)))
 end
 
-### Local optimization
-# a = optimize(loglike, [-0.892754, -3.54437, -1.15664, -2.4652], Optim.Options(show_trace = true))
-# a = optimize(loglike, [2.59586, 1.52545, 4.14018, -0.000230074], BFGS(), Optim.Options(show_trace = true))
-# Optim.minimizer(a)
-
 ### Global Optimization
-ranges = [(-300, 400), (-10, 10), (-10, 10), (-10, 10)]
-res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4, MaxTime = 2700)
+ranges = [(-500, 500), (-500, 500), (-500, 500), (-500, 500)]
+res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4)
+
+save_object("res.jld2", res)
+
+# FINAL BEST: [126.892, -35.7332, 247.032, -0.551443]
+####################################
+
+
+
+# best candidate:
+initPars = [-42.1493, 0.341409, 3.57672, 1.48707e-5] # global
+initPars = [-93.5793, -34.3943, -36.5009, 1.17747] # global
+initPars = [126.892, -35.7332, 247.032, -0.551443]
+
+### Local optimization
+a = optimize(loglike, initPars, Optim.Options(show_trace = true))
+a = optimize(loglike, initPars, BFGS(), Optim.Options(show_trace = true))
+
+
+
+Optim.minimizer(a)
+
+
+
 
 
 # Best candidate: [82.924, 6.61095, -5.62199, -0.0881276]
@@ -142,9 +160,14 @@ res = bboptimize(loglike; SearchRange = ranges, NumDimensions = 4, MaxTime = 270
 ## EXTRA CODE ##
 ################    (Please ignore in a first read)
 
+### EXTRA 1: Plotting probs density conditional on EMPSTAT
+density(probs[df.EMPSTAT .== 1], label="Employed", legend=:topleft, xlabel = "Estimated probability", ylabel = "density")
+density!(probs[df.EMPSTAT .== 2], label="Unemployed", legend=:topleft)
+density!(probs[df.EMPSTAT .== 3], label="NILF", legend=:topleft)
+plot!(size=(600,400))
+savefig("prob_empstat.pdf")
 
 ### EXTRA 1: Plotting probabilities
-
 # Function to compute 3D Plots
 function plotProb(values, grid1, grid2)
     function zAxis(x_grid1, y_grid2)
